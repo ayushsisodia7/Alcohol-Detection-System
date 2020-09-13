@@ -4,3 +4,5 @@ Nowadays many road accidents are happening because of alcohol consumption of the
 Another issue, when the drunken drivers drive alone, nobody will give warning to them. That will be the primary problem because the drunk drivers always drive alone particularly during late night with unconsciousness situation and they lose their rationalism.
 
 So, We are Proposing an Alcohol Detection System
+
+For More info regarding this Project, kindly mail to aayushsisodia007@gmail.com
