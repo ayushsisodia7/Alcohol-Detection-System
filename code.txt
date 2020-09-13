@@ -1,0 +1,81 @@
+
+#include<GSM.h>                                             //this library enables an Arduino board to do most of the operations you can do with a GSM phone
+#define ADC_PIN A0                                          // connect MQ3 to A0 sensor pin
+#define PINNUMBER "1234"                                    //default SIM Pin Number is 1234 ; You can set your own one as well
+char phone_no[] = "xxxxxxxxxx";                             //phone number where sms has to be sent
+char text[] = "Caution! Driver is Drunk\n UID number is xxxxxxxx";                                  //message body   
+
+
+GSM gsm1;                                                 //GSM objecct(instance of a class)          // base class for all GSM based functions.
+GSM_SMS sms;                                                //GSM_SMS object(instance of a class)      //base class for all GSM functions relating to receiving and sending SMS messages.
+float v,mgL;
+
+void setup()
+{
+  
+  Serial.begin(9600);                                 // opens serial port, sets data rate to 9600 bps
+  bool test = true;                                           //testing connection (condition)                       //local variable to track the connection status.
+  while (test)                                               //to check the availability of GSM
+  {
+    if (gsm1.begin(PINNUMBER) == GSM_READY)                  //connects to GSM Network and returns GSM_READY if synchronous         //SIM card's PIN is the argument
+      test = false;                                             //GSM is Ready
+    else
+    {
+      Serial.println("Not Connected");                      //Display if test fails
+      delay(1000);
+    }
+  }
+  Serial.println("GSM Connected ");                       //GSM connection has been established
+}
+
+void loop()
+{
+  int val_ADC = analogRead(ADC_PIN);                         // Read analog value from MQ3 sensor
+
+  Serial.print("Alcohol Analog Data = ");                    // Printout the raw data
+  Serial.print(val_ADC);
+  delay(100);
+
+   float v= (val_ADC) * (5.0/1024.0);
+   float mgL= 0.67 * v;
+  // Printout our estimate of drunkenness
+  if (mgL <= 150)
+  {
+    Serial.println("  Conclusion: Stone Cold Sober!");        //Not drinking alcohol or not drunk
+  }
+  else if (mgL > 300)                                     //drunk case
+  {
+    Serial.println("  Conclusion:  Yep, your DRUNK");
+    sendSMS();                                                     //sms function call
+    exit(0);                                                       //exit from loop
+  }
+  else
+  {
+    Serial.println("  Drinking - but within legal limits");          //driver safe
+  }
+  delay(1000);                                                    // Take a reading every second for test purposes.
+}
+
+void sendSMS()
+{
+  Serial.print("Message to mobile number");
+  Serial.println(phone_no);                           //phone number of reciever
+
+  Serial.print("Sending ");                        //overview of the message that is being sent
+  Serial.println("Message ");
+  Serial.println(text);
+  delay(100);
+
+  sms.beginSMS(phone_no);                          //phone number where message is to be sent
+  delay(1000);
+  sms.print(text);                                 //message body
+  delay(100);
+  sms.println("Issue an E-Challan");
+  delay(1000);
+  sms.endSMS();                                   //end of message
+  delay(1000);
+
+  Serial.println("Complete");                        //confirmation that message ended successfully
+  delay(2000);
+  gsm1.shutdown();                                 //Disconnects from the GSM network identified on the SIM card by powering the modem off.
+}
